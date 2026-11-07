@@ -15,6 +15,15 @@
 
     <p id="load-msg" class="msg" role="status">기준을 불러오는 중…</p>
 
+    <div class="card model">
+      <label for="model-select">AI 모델</label>
+      <select id="model-select">
+        <option value="">서버 기본값</option>
+      </select>
+      <input id="model-custom" type="text" placeholder="모델 이름 직접 입력" spellcheck="false" autocomplete="off" hidden>
+      <p id="model-line" class="hint"></p>
+    </div>
+
     <nav class="tabs" role="tablist">
       <button role="tab" id="tab-classify" aria-selected="true" aria-controls="panel-classify">분류</button>
       <button role="tab" id="tab-score" aria-selected="false" aria-controls="panel-score">채점</button>

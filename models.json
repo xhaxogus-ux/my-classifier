@@ -1,0 +1,13 @@
+{
+  "checked": "2026-11-07",
+  "source": "https://aistudio.google.com/docs/pricing",
+  "note": "무료 등급(Free Tier)의 입력 · 출력이 모두 Free of charge 인 글쓰기 모델. 음성 · 번역 · 임베딩 · TTS · 이미지 · 영상 모델과 지원 중단(deprecated) 표시가 붙은 gemini-2.5-flash · gemini-2.5-pro 는 뺐다.",
+  "order_note": "순서는 추정이다. 무료 등급의 모델별 하루 요청 수는 공식 문서에 없고 AI Studio 에 로그인해야 보인다. 근거가 없어 Lite 계열이 한도가 넉넉할 것이라는 추정만으로 앞에 두었다.",
+  "models": [
+    { "id": "gemini-3.5-flash-lite", "label": "" },
+    { "id": "gemini-3.1-flash-lite", "label": "" },
+    { "id": "gemini-3.6-flash", "label": "이전 세대" },
+    { "id": "gemini-3.8-flash", "label": "" },
+    { "id": "gemini-3-flash-preview", "label": "프리뷰" }
+  ]
+}

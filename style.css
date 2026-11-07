@@ -28,6 +28,7 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   background: var(--bg);
@@ -49,8 +50,8 @@ body {
   margin-top: 12px;
 }
 label { display: block; font-weight: 600; margin-bottom: 8px; }
-textarea, button { font: inherit; color: inherit; }
-textarea {
+textarea, button, select, input { font: inherit; color: inherit; }
+textarea, select, input {
   width: 100%;
   background: var(--bg);
   border: 1px solid var(--line);
@@ -69,6 +70,9 @@ button {
 }
 button:disabled { opacity: 0.5; cursor: default; }
 #classify-btn { margin-top: 12px; }
+.model #model-custom { margin-top: 8px; }
+.model #model-line { margin-top: 8px; }
+.hint.error { color: var(--bad); }
 
 .msg { margin-top: 10px; min-height: 1.2em; }
 .msg.error, .bad { color: var(--bad); }

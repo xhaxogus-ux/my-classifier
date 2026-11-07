@@ -8,12 +8,78 @@
   var BATCH = 10;           // 채점 때 한 번에 보내는 문장 수
   var lastAiResult = null;  // 내려받기용
 
+  // ── AI 모델 고르기 ────────────────────────────────────────────────────────────
+  // 목록은 models.json 에서 읽는다. 고른 값은 브라우저에 기억한다(못 써도 앱은 돈다).
+  var CUSTOM = "__custom__";
+  var MODEL_RE = /^[A-Za-z0-9][A-Za-z0-9._\-]{0,63}$/;   // 서버와 같은 검사
+  var serverDefault = "";
+  var store = {
+    get: function (k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* 무시 */ } }
+  };
+
+  // «서버 기본값»이면 "", 잘못된 직접 입력이면 null
+  function chosenModel() {
+    var v = $("model-select").value;
+    if (v !== CUSTOM) return v;
+    var c = $("model-custom").value.trim();
+    return MODEL_RE.test(c) ? c : null;
+  }
+
+  function updateModelLine() {
+    var custom = $("model-select").value === CUSTOM;
+    $("model-custom").hidden = !custom;
+    var m = chosenModel(), line = $("model-line");
+    line.className = "hint";
+    if (m === null) {
+      line.textContent = $("model-custom").value.trim()
+        ? "모델 이름 형식이 올바르지 않아요 (영문 · 숫자 · . _ - 만, 64자 이하)"
+        : "모델 이름을 입력해 주세요";
+      line.className = "hint error";
+    } else if (m === "") {
+      line.textContent = "지금 부르는 모델: 서버 기본값 (" + (serverDefault || "확인 안 됨") + ")";
+    } else {
+      line.textContent = "지금 부르는 모델: " + m;
+    }
+  }
+
+  function setupModels(list) {
+    var sel = $("model-select");
+    (list || []).forEach(function (m) {
+      sel.appendChild(new Option(m.label ? m.id + " (" + m.label + ")" : m.id, m.id));
+    });
+    sel.appendChild(new Option("직접 입력…", CUSTOM));
+    var saved = store.get("model.choice");
+    if (saved !== null && Array.prototype.some.call(sel.options, function (o) { return o.value === saved; })) {
+      sel.value = saved;
+    }
+    $("model-custom").value = store.get("model.custom") || "";
+    sel.addEventListener("change", function () {
+      store.set("model.choice", sel.value);
+      updateModelLine();
+      if (sel.value === CUSTOM) $("model-custom").focus();
+    });
+    $("model-custom").addEventListener("input", function () {
+      store.set("model.custom", $("model-custom").value.trim());
+      updateModelLine();
+    });
+    updateModelLine();
+    fetch("api/classify").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (d && typeof d.model === "string") serverDefault = d.model;
+      updateModelLine();
+    }, function () { /* 서버 함수가 없는 곳(로컬) */ });
+  }
+
   // 항상 객체를 돌려준다. 실패하면 results: null 과 reason.
   function callAI(texts) {
+    var model = chosenModel();
+    if (model === null) {
+      return Promise.resolve({ results: null, reason: "모델 이름 형식이 올바르지 않아요" });
+    }
     return fetch("api/classify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ texts: texts })
+      body: JSON.stringify({ texts: texts, model: model })
     }).then(function (r) {
       return r.json().then(function (d) {
         if (!d || typeof d !== "object") throw new Error();
@@ -291,7 +357,9 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   });
 
-  // ── 시작: 기준과 낱말을 읽는다 ────────────────────────────────────────────────
+  // ── 시작: 모델 목록 · 기준 · 낱말을 읽는다 ────────────────────────────────────
+  getJSON("models.json").then(function (d) { setupModels(d.models); }, function () { setupModels([]); });
+
   Promise.all([getJSON("criteria.json"), getJSON("keywords.json")]).then(function (res) {
     var criteria = res[0], keywords = res[1];
     var base = Rules.make(criteria, keywords);

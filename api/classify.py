@@ -1,12 +1,12 @@
 """사내 IT 요청 분류 — Gemini 호출 서버 함수 (Vercel Python)
 
-POST /api/classify  ← {"texts": ["가린 문장", ...]}
+POST /api/classify  ← {"texts": ["가린 문장", ...], "model": "" 또는 모델 이름}
                     → {"results": [{"category", "urgency", "reason"} 또는 null, ...] 또는 null,
                        "model": 쓴 모델, "reason": 실패 이유}
 GET  /api/classify  → {"model": 쓸 모델}
 
 열쇠는 환경 변수 GEMINI_API_KEY 에서만 읽는다. 코드와 폴더에는 두지 않는다.
-모델은 환경 변수 GEMINI_MODEL, 비어 있으면 gemini-3.5-flash-lite.
+모델은 화면에서 고른 값(model). 비어 있으면 환경 변수 GEMINI_MODEL, 그것도 비면 gemini-3.5-flash-lite.
 기준은 criteria.json 에서 읽는다. 문장은 브라우저에서 이름 · 전화번호 · 사번을 가린 뒤 온다.
 파이썬 표준 라이브러리만 쓴다. 넣은 문장은 저장하지 않는다(로그도 남기지 않는다).
 """
@@ -129,9 +129,12 @@ def fail(model, reason, **extra):
 
 
 def classify(payload):
-    model = model_name()
+    # 화면에서 고른 모델. 비어 있으면 GEMINI_MODEL, 그것도 없으면 DEFAULT_MODEL.
+    asked = payload.get("model")
+    model = asked.strip() if isinstance(asked, str) and asked.strip() else model_name()
     if not MODEL_RE.match(model):
-        return 500, fail(None, "GEMINI_MODEL 값의 형식이 올바르지 않습니다")
+        # 모델 이름은 호출 주소에 들어가므로 형식이 틀리면 AI를 부르지 않는다.
+        return 200, fail(None, "모델 이름 형식이 올바르지 않습니다 (영문 · 숫자 · . _ - 만, 64자 이하)")
 
     texts = payload.get("texts")
     if not isinstance(texts, list) or not texts or len(texts) > MAX_TEXTS \
