@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT 요청 분류기</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <h1>IT 요청 분류기</h1>
+      <p class="sub">AI(Gemini)가 가르고, AI가 실패하면 단어 규칙으로 가릅니다</p>
+    </header>
+
+    <p id="load-msg" class="msg" role="status">기준을 불러오는 중…</p>
+
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="tab-classify" aria-selected="true" aria-controls="panel-classify">분류</button>
+      <button role="tab" id="tab-score" aria-selected="false" aria-controls="panel-score">채점</button>
+    </nav>
+
+    <!-- 분류 -->
+    <section id="panel-classify" role="tabpanel" class="card">
+      <form id="classify-form">
+        <label for="text">요청 문장 한 줄</label>
+        <textarea id="text" rows="3" maxlength="500" required></textarea>
+        <button type="submit" id="classify-btn" disabled>분류</button>
+      </form>
+      <dl id="result" class="result" hidden>
+        <dt>가린 문장</dt><dd id="r-masked"></dd>
+        <dt>칸</dt><dd id="r-cat" class="big"></dd>
+        <dt>긴급도</dt><dd id="r-urg" class="big"></dd>
+        <dt>이유</dt><dd id="r-reason"></dd>
+        <dt>누가</dt><dd id="r-source"></dd>
+      </dl>
+    </section>
+
+    <!-- 채점 -->
+    <section id="panel-score" role="tabpanel" class="card" hidden>
+      <div class="btns">
+        <button type="button" id="score-btn" disabled>규칙으로 채점</button>
+        <button type="button" id="ai-score-btn" disabled>AI로 채점</button>
+      </div>
+      <p id="score-msg" class="msg" role="status"></p>
+
+      <div id="ai-score" hidden>
+        <table class="compare">
+          <thead><tr><th></th><th>규칙</th><th id="ai-col">AI</th></tr></thead>
+          <tbody id="compare-body"></tbody>
+        </table>
+        <p id="ai-cond" class="hint"></p>
+        <p id="ai-fail" class="msg error"></p>
+        <button type="button" id="download-btn" class="ghost">AI 채점 결과 내려받기</button>
+        <h2 id="ai-wrong-title"></h2>
+        <ol id="ai-wrong-list" class="wrong-list"></ol>
+      </div>
+
+      <div id="score" hidden>
+        <div class="stats">
+          <div class="stat"><span>칸 정확도</span><b id="s-cat"></b></div>
+          <div class="stat"><span>긴급도 정확도</span><b id="s-urg"></b></div>
+          <div class="stat"><span>둘 다 맞음</span><b id="s-both"></b></div>
+          <div class="stat"><span>보안 놓침</span><b id="s-sec"></b></div>
+        </div>
+        <p id="s-cond" class="hint"></p>
+        <h2 id="wrong-title"></h2>
+        <ol id="wrong-list" class="wrong-list"></ol>
+      </div>
+    </section>
+  </main>
+
+  <script src="mask.js"></script>
+  <script src="rules.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
